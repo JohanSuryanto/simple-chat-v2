@@ -1,11 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./index.css";
+import socketIOClient from "socket.io-client";
+
+let socket = socketIOClient("http://localhost:3002");
 
 function App() {
+  useEffect(() => {
+    initialize();
+  });
   const [Messages, setMessages] = useState("");
 
+  function initialize() {
+    var messagesElement = document.getElementById("messages");
+
+    socket.on("registUser", function (msg) {
+      var item = document.createElement("li");
+      item.textContent = msg + " join the chat!";
+      item.className = "registUser";
+      messagesElement.appendChild(item);
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+
+    socket.on("chatMessage", function (username, msg) {});
+  }
   function registerUser() {
-    console.log("register user function");
+    socket.emit("registUser", "Anom");
   }
   function inputMessage() {
     var messagesElement = document.getElementById("messages");
@@ -36,12 +55,6 @@ function App() {
         id="registerButton"
         onClick={() => registerUser()}
         value="Register"
-      />
-      <input
-        type="hidden"
-        id="disconnectButton"
-        onClick="disconnectUser()"
-        value="End Chat"
       />
       <input type="hidden" id="username" />
       <ul id="messages"></ul>
